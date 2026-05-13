@@ -5,6 +5,8 @@ sites = {
     'python': 'https://python.org',
     'pornhub': 'https://pornhub.com',
     'youtube': 'https://youtube.com',
+    'files': 'https://files.ir',
+    'uplod': 'https://uplod.ir',
     'django-rest-framework': 'https://www.django-rest-framework.org/',
 }
 
