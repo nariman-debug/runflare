@@ -1,0 +1,27 @@
+name: Generate and Download File
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create a text file
+        run: |
+          echo "این فایل توسط گیت‌هاب ساخته شده!" > output.txt
+          echo "تاریخ: $(date)" >> output.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-download-file
+          path: output.txt
+          retention-days: 1 # فایل رو ۱ روز نگه دار (بعد پاک میشه)
+
+      - name: Show message
+        run: |
+          echo "✅ فایل ساخته شد!"
+          echo "برای دانلود، برو به صفحه این ورک‌فلو (Actions) و روی 'my-download-file' کلیک کن."
