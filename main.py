@@ -1,24 +1,29 @@
-import requests
+import socket
+import urllib.request
 
-
-sites = {
-    'python': 'https://python.org',
-    'pornhub': 'https://pornhub.com',
-    'youtube': 'https://youtube.com',
-    'files': 'https://files.ir',
-    'uplod': 'https://uplod.ir',
-    'django-rest-framework': 'https://www.django-rest-framework.org/',
-}
-
-for site, url in sites.items():
+def get_public_ip():
     try:
-        resp = requests.get(url, timeout=10)
-        print('⇓' * 30)
-        print(f'{site}: {resp.url}')
-        print(f'status: {resp.status_code}')
-        print('⇑' * 30, '\n')
-    except requests.exceptions.RequestException as e:
-        print('⇓' * 30)
-        print(f'{site}: {url}')
-        print(f'status: Error: {e}')
-        print('⇑' * 30, '\n')
+        # درخواست به یک سرویس رایگان برای گرفتن IP عمومی
+        with urllib.request.urlopen('https://api.ipify.org?format=text', timeout=5) as response:
+            return response.read().decode().strip()
+    except Exception as e:
+        return f"نمیتونم IP عمومی رو بگیرم (ممکنه فیلتر باشه یا اینترنت قطع): {e}"
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception as e:
+        return f"خطا در IP داخلی: {e}"
+
+if __name__ == "__main__":
+    public_ip = get_public_ip()
+    local_ip = get_local_ip()
+    
+    print(f"🌍 IP عمومی (برای دسترسی از بیرون): {public_ip}")
+    print(f"🏠 IP داخلی (در شبکه خودت): {local_ip}")
+    print("\n⚠️ نکته مهم: اگر IP عمومی‌ت با IP داخلی‌ت فرق داره، یعنی پشت NAT هستی.")
+    print("برای دسترسی از بیرون، باید پورت سرورت (مثلا 8000) رو روی مودم Forward کنی.")
