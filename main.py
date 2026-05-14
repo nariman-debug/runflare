@@ -1,13 +1,22 @@
+import http.server
 import socket
 import urllib.request
+import os
+
+# تنظیمات
+PORT = 8080
+FILE_TO_SEND = "example.txt"  # اسم فایلی که میخوای دانلود بشه
+
+# ایجاد فایل
+with open(FILE_TO_SEND, 'w') as f:
+    f.write('You do it !!!!!!')
 
 def get_public_ip():
     try:
-        # درخواست به یک سرویس رایگان برای گرفتن IP عمومی
         with urllib.request.urlopen('https://api.ipify.org?format=text', timeout=5) as response:
             return response.read().decode().strip()
-    except Exception as e:
-        return f"نمیتونم IP عمومی رو بگیرم (ممکنه فیلتر باشه یا اینترنت قطع): {e}"
+    except:
+        return "نمیتونم IP عمومی رو بگیرم (ممکنه فیلتر باشه)"
 
 def get_local_ip():
     try:
@@ -16,14 +25,31 @@ def get_local_ip():
         ip = s.getsockname()[0]
         s.close()
         return ip
-    except Exception as e:
-        return f"خطا در IP داخلی: {e}"
+    except:
+        return "خطا در دریافت IP"
 
 if __name__ == "__main__":
-    public_ip = get_public_ip()
+    # 1. بررسی وجود فایل
+    if not os.path.exists(FILE_TO_SEND):
+        print(f"❌ فایل '{FILE_TO_SEND}' پیدا نشد! لطفاً یک فایل با این اسم بساز.")
+        exit()
+
+    # 2. گرفتن IPها
     local_ip = get_local_ip()
-    
-    print(f"🌍 IP عمومی (برای دسترسی از بیرون): {public_ip}")
-    print(f"🏠 IP داخلی (در شبکه خودت): {local_ip}")
-    print("\n⚠️ نکته مهم: اگر IP عمومی‌ت با IP داخلی‌ت فرق داره، یعنی پشت NAT هستی.")
-    print("برای دسترسی از بیرون، باید پورت سرورت (مثلا 8000) رو روی مودم Forward کنی.")
+    public_ip = get_public_ip()
+
+    # 3. ساخت آدرس‌ها
+    local_url = f"http://{local_ip}:{PORT}/{FILE_TO_SEND}"
+    public_url = f"http://{public_ip}:{PORT}/{FILE_TO_SEND}"
+
+    print(f"🚀 سرور با موفقیت روی پورت {PORT} شروع شد.")
+    print(f"🏠 آدرس دانلود در شبکه داخلی: {local_url}")
+    print(f"🌍 آدرس دانلود از بیرون (نیاز به تنظیم روتر دارد): {public_url}")
+    print("\n⚠️ نکته: اگر از اینترنت موبایل یا شبکه دیگری وصل شدی، باید پورت {PORT} رو روی مودمت فوروارد کنی.")
+    print("حالا می‌تونی فایل رو دانلود کنی...")
+
+    # 4. اجرای سرور
+    handler = http.server.SimpleHTTPRequestHandler
+    with http.server.HTTPServer(("", PORT), handler):
+        print(f"✅ سرور در حال اجراست. برای خروج Ctrl+C رو بزن.")
+        http.server.HTTPServer(("", PORT), handler).serve_forever()
