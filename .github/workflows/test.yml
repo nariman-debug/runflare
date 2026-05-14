@@ -1,6 +1,6 @@
 name: Generate and Download File
 
-on: [push, workflow_dispatch]
+on: [workflow_dispatch]
 
 jobs:
   build:
